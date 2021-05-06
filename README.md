@@ -21,11 +21,11 @@ optional arguments:
     
    Specify less pages to scrape:
    
-    python3 linkedin_email_scraper.py -k "Microsoft" -l 50
+    python3 linkedin_email_scraper.py -k "Microsoft" -p 50
 
    Example Output of linkedin_email_scraper.py:
    
-    $ python3 linkedin_email_scraper.py -k "microsoft" -l 5
+    $ python3 linkedin_email_scraper.py -k "microsoft" -p 5
     [+] Scraping page 1 Good:12 Bad:1
     [+] Scraping page 2 Good:21 Bad:1
     [+] Scraping page 3 Good:28 Bad:3
