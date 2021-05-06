@@ -28,13 +28,16 @@ def parse_page(page):
     return new_entries
 
 def make_request(page_num):
-    url = "https://www.linkedin.com/search/results/index/?keywords=" \
-          + str(r.utils.quote(args.keywords)) \
-          + "&origin=GLOBAL_SEARCH_HEADER&page=" \
-          + str(page_num)
-    cookie = {'li_at': '"' + args.cookie + '";'}
-    page = r.get(url, cookies=cookie).text
-    return page
+    if len(args.cookie) <= 0:
+        sys.exit('[-] You haven\'t hardcoded or entered your li_at cookie yet d3rp.')
+    else:
+        url = "https://www.linkedin.com/search/results/index/?keywords=" \
+              + str(r.utils.quote(args.keywords)) \
+              + "&origin=GLOBAL_SEARCH_HEADER&page=" \
+              + str(page_num)
+        cookie = {'li_at': '"' + args.cookie + '";'}
+        page = r.get(url, cookies=cookie).text
+        return page
 
 def control():
     for page_num in range(1, int(args.length_pages) + 1):
@@ -91,7 +94,7 @@ if __name__ == '__main__':
     bad = []
     cookie = '' #hardcode me
     parser = argparse.ArgumentParser()
-    parser.add_argument('-k', action='store', dest='keywords', nargs='?',
+    parser.add_argument('-k', action='store', dest='keywords', nargs='?', required=True,
                         help='Search term keywords.')
     parser.add_argument('-p', action='store', dest='length_pages', nargs='?', default=100, const=100,
                         help='How many linked in pages you want to scrape. [Default all 100]')
