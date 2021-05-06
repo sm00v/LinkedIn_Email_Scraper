@@ -87,7 +87,7 @@ def log_names():
         else:
             new_name = name_format(new_name)
             log_file.write(new_name); log_file.write('\n')
-    print('[+] Saved to output.txt')
+    print('[+] Saved to ' + str(args.log_file))
 
 if __name__ == '__main__':
     good = []
@@ -97,7 +97,7 @@ if __name__ == '__main__':
     parser.add_argument('-k', action='store', dest='keywords', nargs='?', required=True,
                         help='Search term keywords.')
     parser.add_argument('-p', action='store', dest='length_pages', nargs='?', default=100, const=100,
-                        help='How many linked in pages you want to scrape. [Default all 100]')
+                        help='How many linkedin pages you want to scrape. [Default all 100]')
     parser.add_argument('-c', action='store', dest='cookie', nargs='?', default=cookie, const=cookie,
                         help='LinkedIn li_at session cookie. [AQEDAR1hbLMFawzeAAABd5bk........CQBPcCMRrTC5t55shATUJv]')
     parser.add_argument('-f', action='store_true', dest='first_initial',
