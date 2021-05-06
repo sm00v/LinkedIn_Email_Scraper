@@ -106,7 +106,7 @@ if __name__ == '__main__':
                         help='Save last name as last initial.')
     parser.add_argument('-e', action='store', dest='email',nargs='?', default=None, const=None,
                         help='Append a domain to each name.')
-    parser.add_argument('-d', action='store', dest='delimiter',nargs='?', default=' ', const=' ',
+    parser.add_argument('-d', action='store', dest='delimiter',nargs='?', default='', const='',
                         help='Delimiter to split between first and last name.')
     parser.add_argument('-o', action='store', dest='log_file', nargs='?', default='output.txt', const='output.txt',
                         help='Output list to file.')
