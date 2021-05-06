@@ -1,7 +1,7 @@
 # LinkedIn Username/Email Formattable Scraper
 <b>linkedin_email_scraper.py</b> is a  <a href="https://linkedin.com">linkedin.com</a> scraper tool which queries the LinkedIn global search bar and scrapes all names on pages 1-100 (LinkedIn maximum pages).
 
-## 1: linkedin_email_scraper.py usage:
+## linkedin_email_scraper.py usage:
 ```
 usage: linkedin_email_scraper.py [-h] -k [KEYWORDS] [-p [LENGTH_PAGES]] [-c [COOKIE]] [-f] [-l] [-e [EMAIL]] [-d [DELIMITER]] [-o [LOG_FILE]]
 
