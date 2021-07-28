@@ -31,13 +31,24 @@ def make_request(page_num):
     if len(args.cookie) <= 0:
         sys.exit('[-] You haven\'t hardcoded or entered your li_at cookie yet d3rp.')
     else:
-        url = "https://www.linkedin.com/search/results/index/?keywords=" \
-              + str(r.utils.quote(args.keywords)) \
-              + "&origin=GLOBAL_SEARCH_HEADER&page=" \
-              + str(page_num)
-        cookie = {'li_at': '"' + args.cookie + '";'}
-        page = r.get(url, cookies=cookie).text
-        return page
+        if args.keywords is not None:
+            url = "https://www.linkedin.com/search/results/all/?keywords=" \
+                  + str(r.utils.quote(args.keywords)) \
+                  + "&origin=GLOBAL_SEARCH_HEADER&page=" \
+                  + str(page_num)
+            cookie = {'li_at': '"' + args.cookie + '";'}
+            page = r.get(url, cookies=cookie).text
+            return page
+        elif args.company_id is not None:
+            url = f'https://www.linkedin.com/search/results/people/?currentCompany=["{args.company_id}"]&origin=COMPANY_PAGE_CANNED_SEARCH&page={page_num}'
+            cookie = {'li_at': '"' + args.cookie + '";'}
+            page = r.get(url, cookies=cookie).text
+            return page
+        elif args.keywords == None and args.company_id == None:
+            print('[-] Use -h for help')
+            sys.exit('[-] Use -k or -i for keyword or company id search, exiting...')
+        else:
+            sys.exit('[-] Broken arguements, exiting...')
 
 def control():
     for page_num in range(1, int(args.length_pages) + 1):
@@ -66,6 +77,14 @@ def name_format(name):
         name = f_init + delimiter + last_name + email; return name
     elif args.last_initial:
         name = first_name + delimiter + l_init + email; return name
+
+
+    elif args.first_name and args.last_name:
+        name = first_name + delimiter + last_name + email; return name
+    elif args.first_name:
+        name = first_name + email; return name
+    elif args.last_name:
+        name = last_name + email; return name
     else:
         return first_name + delimiter + last_name + email
 
@@ -94,20 +113,26 @@ if __name__ == '__main__':
     bad = []
     cookie = '' #hardcode me
     parser = argparse.ArgumentParser()
-    parser.add_argument('-k', action='store', dest='keywords', nargs='?', required=True,
+    parser.add_argument('-k', action='store', dest='keywords', nargs='?', default=None, const=None,
                         help='Search term keywords.')
     parser.add_argument('-p', action='store', dest='length_pages', nargs='?', default=100, const=100,
                         help='How many linkedin pages you want to scrape. [Default all 100]')
     parser.add_argument('-c', action='store', dest='cookie', nargs='?', default=cookie, const=cookie,
                         help='LinkedIn li_at session cookie. [AQEDAR1hbLMFawzeAAABd5bk........CQBPcCMRrTC5t55shATUJv]')
-    parser.add_argument('-f', action='store_true', dest='first_initial',
+    parser.add_argument('-fi', action='store_true', dest='first_initial',
                         help='Save first name as first initial.')
-    parser.add_argument('-l', action='store_true', dest='last_initial',
+    parser.add_argument('-li', action='store_true', dest='last_initial',
                         help='Save last name as last initial.')
+    parser.add_argument('-f', action='store_true', dest='first_name',
+                        help='Save first name.')
+    parser.add_argument('-l', action='store_true', dest='last_name',
+                        help='Save last name.')
     parser.add_argument('-e', action='store', dest='email',nargs='?', default=None, const=None,
                         help='Append a domain to each name.')
     parser.add_argument('-d', action='store', dest='delimiter',nargs='?', default='', const='',
                         help='Delimiter to split between first and last name.')
+    parser.add_argument('-i', action='store', dest='company_id', nargs='?', default=None, const=None,
+                        help='Company ID found in URL of LinkedIn business page. [XXXXXXX]')
     parser.add_argument('-o', action='store', dest='log_file', nargs='?', default='output.txt', const='output.txt',
                         help='Output list to file.')
     args = parser.parse_args()
