@@ -3,17 +3,20 @@
 
 ## linkedin_email_scraper.py usage:
 ```
-usage: linkedin_email_scraper.py [-h] -k [KEYWORDS] [-p [LENGTH_PAGES]] [-c [COOKIE]] [-f] [-l] [-e [EMAIL]] [-d [DELIMITER]] [-o [LOG_FILE]]
+usage: linkedin_email_scraper.py [-h] [-k [KEYWORDS]] [-p [LENGTH_PAGES]] [-c [COOKIE]] [-fi] [-li] [-f] [-l] [-e [EMAIL]] [-d [DELIMITER]] [-i [COMPANY_ID]] [-o [LOG_FILE]]
 
 optional arguments:
   -h, --help         show this help message and exit
   -k [KEYWORDS]      Search term keywords.
   -p [LENGTH_PAGES]  How many linkedin pages you want to scrape. [Default all 100]
   -c [COOKIE]        LinkedIn li_at session cookie. [AQEDAR1hbLMFawzeAAABd5bk........CQBPcCMRrTC5t55shATUJv]
-  -f                 Save first name as first initial.
-  -l                 Save last name as last initial.
+  -fi                Save first name as first initial.
+  -li                Save last name as last initial.
+  -f                 Save first name.
+  -l                 Save last name.
   -e [EMAIL]         Append a domain to each name.
   -d [DELIMITER]     Delimiter to split between first and last name.
+  -i [COMPANY_ID]    Company ID found in URL of LinkedIn business page. [XXXXXXX]
   -o [LOG_FILE]      Output list to file.
 ```
    Basic usage of script:
@@ -57,3 +60,7 @@ optional arguments:
     K.Kennebrew@microsoft.com
     J.Victorino@microsoft.com
     Y.Diogenes@microsoft.com
+   
+  You may now use the -i option to specifiy a company's ID which can be found in the URL by browsing its employees page:
+
+    python3 linkedin_email_scraper.py -i 123456
