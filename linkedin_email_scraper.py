@@ -1,62 +1,89 @@
-import json
-import requests as r
-import argparse
-import bs4
-import re
-import os
-import signal
 import sys
+import time
+from selenium import webdriver
+from selenium.webdriver.firefox.options import Options
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support import expected_conditions as ec
+from selenium.webdriver.common.proxy import Proxy, ProxyType
+from selenium.webdriver.common.by import By
+import argparse
 
-# ||\\\\ kekw
 
-def filter_names(prospects):
-    for entry in prospects:
-        name = entry[len(entry)-1]
-        length_name = len(name)
-        if length_name <= 1 or length_name >= 100: pass
-        elif len(name.split(' ')) >= 4: bad.append(name)
-        elif not name.replace(' ', '').isalpha(): bad.append(name)
-        else:
-            try: int(name)
-            except Exception: good.append(name);
+def create_profile():
+    profile = webdriver.FirefoxProfile()
+    if args.proxy is not None:
+        profile.set_preference("network.proxy.type", 5)
+        profile.set_preference("network.proxy.socks", args.proxy)
+        profile.set_preference("network.proxy.socks_port", args.proxy_port)
+        profile.set_preference("network.proxy.socks_remote_dns", True)
+        profile.set_preference("general.useragent.override", "Gecko")
+        profile.update_preferences()
+        return profile
+    else:
+        profile.set_preference("browser.privatebrowsing.autostart", True)
+        profile.update_preferences()
+        return profile
 
-def parse_page(page):
-    start = ';accessibilityText&quot;:&quot;View '
-    end = 'âs profi'
-    entries = page.split(end)
-    new_entries = [entry.split(start) for entry in entries]
-    return new_entries
+def load_browser():
+    profile = create_profile()
+    options = Options()
+    options.headless = True
+    driver = webdriver.Firefox(options=options, firefox_profile=profile)
+    return driver
 
-def make_request(page_num):
+def argparser():
+    cookie = '' #hardcode me
+
+    parser = argparse.ArgumentParser(description="Selenium LinkedIn Scraper >:D")
+    parser.add_argument("-p", "--proxy", help="The proxy ip in format {10.0.0.1}.", default='127.0.0.1')
+    parser.add_argument("-pp", "--proxy_port", type=int, help="The proxy port in format {1080}.", default=1080)
+    parser.add_argument('-c', action='store', dest='cookie', nargs='?', default=cookie, const=cookie,
+                        help='LinkedIn li_at session cookie. [AQEDAR1hbLMFawzeAAABd5bk........CQBPcCMRrTC5t55shATUJv]')
+    parser.add_argument('-fi', action='store_true', dest='first_initial',
+                        help='Save first name as first initial.')
+    parser.add_argument('-li', action='store_true', dest='last_initial',
+                        help='Save last name as last initial.')
+    parser.add_argument('-f', action='store_true', dest='first_name',
+                        help='Save first name.')
+    parser.add_argument('-l', action='store_true', dest='last_name',
+                        help='Save last name.')
+    parser.add_argument('-e', action='store', dest='email', nargs='?', default=None, const=None,
+                        help='Append a domain to each name.')
+    parser.add_argument('-d', action='store', dest='delimiter', nargs='?', default='', const='',
+                        help='Delimiter to split between first and last name.')
+    parser.add_argument('-i', action='store', dest='company_id', nargs='?', default=None, const=None,
+                        help='Company ID found in URL of LinkedIn business page. [XXXXXXX]')
+    parser.add_argument('-o', action='store', dest='log_file', nargs='?', default='output.txt', const='output.txt',
+                        help='Output list to file.')
+    return parser.parse_args()
+
+def find_names(): # search for names in loaded page
+    raw_names = []
+    for num in range(1,11):
+        try:
+            name = WebDriverWait(driver, 1).until(ec.presence_of_element_located((By.XPATH,f"/html/body/div[6]/div[3]/div[2]/div/div[1]/main/div/div/div[1]/ul/li[{num}]/div/div/div[2]/div[1]/div[1]/div/span[1]/span/a/span/span[1]"))).text
+            raw_names.append(name)
+        except Exception as e:
+            pass
+    return raw_names
+
+def login():
     if len(args.cookie) <= 0:
         sys.exit('[-] You haven\'t hardcoded or entered your li_at cookie yet d3rp.')
-    else:
-        if args.keywords is not None:
-            url = "https://www.linkedin.com/search/results/all/?keywords=" \
-                  + str(r.utils.quote(args.keywords)) \
-                  + "&origin=GLOBAL_SEARCH_HEADER&page=" \
-                  + str(page_num)
-            cookie = {'li_at': '"' + args.cookie + '";'}
-            page = r.get(url, cookies=cookie).text
-            return page
-        elif args.company_id is not None:
-            url = f'https://www.linkedin.com/search/results/people/?currentCompany=["{args.company_id}"]&origin=COMPANY_PAGE_CANNED_SEARCH&page={page_num}'
-            cookie = {'li_at': '"' + args.cookie + '";'}
-            page = r.get(url, cookies=cookie).text
-            return page
-        elif args.keywords == None and args.company_id == None:
-            print('[-] Use -h for help')
-            sys.exit('[-] Use -k or -i for keyword or company id search, exiting...')
-        else:
-            sys.exit('[-] Broken arguements, exiting...')
 
-def control():
-    for page_num in range(1, int(args.length_pages) + 1):
-        page = make_request(page_num)
-        entries = parse_page(page)
-        filter_names(entries)
-        print("[+] Scraping page " + str(page_num) + " Good:" + str(len(good)) + " Bad:" + str(len(bad)))
-    log_names()
+    print('[+] Logging in')
+    search_url = f'https://www.linkedin.com/search/results/people/?currentCompany=["{args.company_id}"]&origin=COMPANY_PAGE_CANNED_SEARCH&page=1'
+    driver.get(url)
+    time.sleep(2)
+    driver.add_cookie({'name': 'li_at', 'value': cookie})
+    driver.get(search_url)
+    time.sleep(5)
+
+def get_pages():
+    driver.execute_script("window.scrollTo(0, document.body.scrollHeight)")
+    pages = int(WebDriverWait(driver, 15).until(ec.presence_of_element_located((By.XPATH, "/html/body/div[6]/div[3]/div[2]/div/div[1]/main/div/div/div[3]/div/div/ul/li[10]/button/span"))).text)
+    print(f'[+] Got {pages} pages, finding names.')
+    return pages
 
 def prompt(name):
     fix_name = input('[-] Fix me ['+name+']: ')
@@ -108,35 +135,32 @@ def log_names():
             log_file.write(new_name); log_file.write('\n')
     print('[+] Saved to ' + str(args.log_file))
 
+def filter_names(prospects):
+    for name in prospects:
+        if not name.replace(' ', '').isalpha(): bad.append(name)
+        else: good.append(name)
+
 if __name__ == '__main__':
+    url = 'https://www.linkedin.com/'
+
+    all_names = []
     good = []
     bad = []
-    cookie = '' #hardcode me
-    parser = argparse.ArgumentParser()
-    parser.add_argument('-k', action='store', dest='keywords', nargs='?', default=None, const=None,
-                        help='Search term keywords.')
-    parser.add_argument('-p', action='store', dest='length_pages', nargs='?', default=100, const=100,
-                        help='How many linkedin pages you want to scrape. [Default all 100]')
-    parser.add_argument('-c', action='store', dest='cookie', nargs='?', default=cookie, const=cookie,
-                        help='LinkedIn li_at session cookie. [AQEDAR1hbLMFawzeAAABd5bk........CQBPcCMRrTC5t55shATUJv]')
-    parser.add_argument('-fi', action='store_true', dest='first_initial',
-                        help='Save first name as first initial.')
-    parser.add_argument('-li', action='store_true', dest='last_initial',
-                        help='Save last name as last initial.')
-    parser.add_argument('-f', action='store_true', dest='first_name',
-                        help='Save first name.')
-    parser.add_argument('-l', action='store_true', dest='last_name',
-                        help='Save last name.')
-    parser.add_argument('-e', action='store', dest='email',nargs='?', default=None, const=None,
-                        help='Append a domain to each name.')
-    parser.add_argument('-d', action='store', dest='delimiter',nargs='?', default='', const='',
-                        help='Delimiter to split between first and last name.')
-    parser.add_argument('-i', action='store', dest='company_id', nargs='?', default=None, const=None,
-                        help='Company ID found in URL of LinkedIn business page. [XXXXXXX]')
-    parser.add_argument('-o', action='store', dest='log_file', nargs='?', default='output.txt', const='output.txt',
-                        help='Output list to file.')
-    args = parser.parse_args()
     try:
-        control()
+        args = argparser()
+        driver = load_browser()
+        login()
+        pages = get_pages()
+        for page in range(1, pages+1):
+            search_url = f'https://www.linkedin.com/search/results/people/?currentCompany=["{args.company_id}"]&origin=COMPANY_PAGE_CANNED_SEARCH&page={page}'
+            if page != 1:
+                driver.get(search_url)
+                time.sleep(3)
+            entries = find_names()
+            filter_names(entries)
+            print("[+] Scraping page " + str(page) + " Good:" + str(len(good)) + " Bad:" + str(len(bad)))
+        log_names()
+        driver.quit()
+        sys.exit()
     except KeyboardInterrupt:
         sys.exit('\n[-] Exiting')
