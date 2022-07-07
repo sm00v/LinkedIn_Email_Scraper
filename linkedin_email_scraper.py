@@ -75,7 +75,7 @@ def login():
     search_url = f'https://www.linkedin.com/search/results/people/?currentCompany=["{args.company_id}"]&origin=COMPANY_PAGE_CANNED_SEARCH&page=1'
     driver.get(url)
     time.sleep(2)
-    driver.add_cookie({'name': 'li_at', 'value': cookie})
+    driver.add_cookie({'name': 'li_at', 'value': args.cookie})
     driver.get(search_url)
     time.sleep(5)
 
