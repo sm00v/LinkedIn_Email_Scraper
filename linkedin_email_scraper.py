@@ -27,7 +27,7 @@ def create_profile():
 def load_browser():
     profile = create_profile()
     options = Options()
-    options.headless = True
+    options.headless = False
     driver = webdriver.Firefox(options=options, firefox_profile=profile)
     return driver
 
@@ -60,11 +60,16 @@ def argparser():
 def find_names(): # search for names in loaded page
     raw_names = []
     for num in range(1,11):
-        try:
-            name = WebDriverWait(driver, 1).until(ec.presence_of_element_located((By.XPATH,f"/html/body/div[6]/div[3]/div[2]/div/div[1]/main/div/div/div[1]/ul/li[{num}]/div/div/div[2]/div[1]/div[1]/div/span[1]/span/a/span/span[1]"))).text
-            raw_names.append(name)
-        except Exception as e:
-            pass
+        path = f"/html/body/div[" + str(num)
+        for x in range(1, 11):
+            try:
+                name = driver.find_element_by_xpath(f"{path}]/div[3]/div[2]/div/div[1]/main/div/div/div[1]/ul/li[{x}]/div/div/div[2]/div[1]/div[1]/div/span[1]/span/a/span/span[1]").text
+                if name:
+                    raw_names.append(name)
+                    # print(f"Found name: ",name)
+            except Exception as e:
+                # print("[-] Exception caught at find_names()")
+                pass
     return raw_names
 
 def login():
@@ -81,7 +86,18 @@ def login():
 
 def get_pages():
     driver.execute_script("window.scrollTo(0, document.body.scrollHeight)")
-    pages = int(WebDriverWait(driver, 15).until(ec.presence_of_element_located((By.XPATH, "/html/body/div[6]/div[3]/div[2]/div/div[1]/main/div/div/div[3]/div/div/ul/li[10]/button/span"))).text)
+    print("[+] Waiting for hidden elements to unhide.")
+    # pages = int(WebDriverWait(driver, 15).until(ec.presence_of_element_located((By.XPATH, "/html/body/div[6]/div[3]/div[2]/div/div[1]/main/div/div/div[3]/div/div/ul/li[10]/button/span"))).text)
+    time.sleep(5)
+    # pages = int(driver.find_element_by_xpath("/html/body/div[5]/div[3]/div[2]/div/div[1]/main/div/div/div[3]/div/div/ul/li[10]/button/span").text)
+    for x in range(1,11):
+        try:
+            pages = int(driver.find_element_by_xpath(f"/html/body/div[{x}]/div[3]/div[2]/div/div[1]/main/div/div/div[3]/div/div/ul/li[10]/button/span").text)
+            if pages:
+                break
+        except Exception:
+            pass
+
     print(f'[+] Got {pages} pages, finding names.')
     return pages
 
