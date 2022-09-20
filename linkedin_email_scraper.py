@@ -90,6 +90,7 @@ def get_pages():
     # pages = int(WebDriverWait(driver, 15).until(ec.presence_of_element_located((By.XPATH, "/html/body/div[6]/div[3]/div[2]/div/div[1]/main/div/div/div[3]/div/div/ul/li[10]/button/span"))).text)
     time.sleep(5)
     # pages = int(driver.find_element_by_xpath("/html/body/div[5]/div[3]/div[2]/div/div[1]/main/div/div/div[3]/div/div/ul/li[10]/button/span").text)
+    pages = None
     for x in range(1,11):
         try:
             pages = int(driver.find_element_by_xpath(f"/html/body/div[{x}]/div[3]/div[2]/div/div[1]/main/div/div/div[3]/div/div/ul/li[10]/button/span").text)
@@ -97,7 +98,8 @@ def get_pages():
                 break
         except Exception:
             pass
-
+    if pages == None:
+        pages = 10
     print(f'[+] Got {pages} pages, finding names.')
     return pages
 
@@ -172,8 +174,14 @@ if __name__ == '__main__':
             if page != 1:
                 driver.get(search_url)
                 time.sleep(3)
-            entries = find_names()
-            filter_names(entries)
+            try:
+                entries = find_names()
+            except Exception as e:
+                break
+            try:
+                filter_names(entries)
+            except Exception as e:
+                break
             print("[+] Scraping page " + str(page) + " Good:" + str(len(good)) + " Bad:" + str(len(bad)))
         log_names()
         driver.quit()
