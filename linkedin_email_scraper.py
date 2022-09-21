@@ -27,7 +27,7 @@ def create_profile():
 def load_browser():
     profile = create_profile()
     options = Options()
-    options.headless = False
+    options.headless = True
     driver = webdriver.Firefox(options=options, firefox_profile=profile)
     return driver
 
