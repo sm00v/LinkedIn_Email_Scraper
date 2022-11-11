@@ -63,13 +63,15 @@ def find_names(): # search for names in loaded page
         path = f"/html/body/div[" + str(num)
         for x in range(1, 11):
             try:
-                name = driver.find_element_by_xpath(f"{path}]/div[3]/div[2]/div/div[1]/main/div/div/div[1]/ul/li[{x}]/div/div/div[2]/div[1]/div[1]/div/span[1]/span/a/span/span[1]").text
+                # name = driver.find_element_by_xpath(f"{path}]/div[3]/div[2]/div/div[1]/main/div/div/div[1]/ul/li[{x}]/div/div/div[2]/div[1]/div[1]/div/span[1]/span/a/span/span[1]").text
+                name = driver.find_element_by_xpath(f"{path}]/div[3]/div[2]/div/div[1]/main/div/div/div[2]/div/ul/li[{x}]/div/div/div[2]/div[1]/div[1]/div/span[1]/span/a/span/span[1]").text
                 if name:
                     raw_names.append(name)
                     # print(f"Found name: ",name)
             except Exception as e:
-                # print("[-] Exception caught at find_names()")
+                # print("[-] Exception caught at find_names():",e)
                 pass
+    # exit()
     return raw_names
 
 def login():
@@ -93,7 +95,8 @@ def get_pages():
     pages = None
     for x in range(1,11):
         try:
-            pages = int(driver.find_element_by_xpath(f"/html/body/div[{x}]/div[3]/div[2]/div/div[1]/main/div/div/div[3]/div/div/ul/li[10]/button/span").text)
+            # pages = int(driver.find_element_by_xpath(f"/html/body/div[{x}]/div[3]/div[2]/div/div[1]/main/div/div/div[3]/div/div/ul/li[10]/button/span").text)
+            pages = int(driver.find_element_by_xpath(f"/html/body/div[{x}]/div[3]/div[2]/div/div[1]/main/div/div/div[4]/div/div/ul/li[10]/button/span").text)
             if pages:
                 break
         except Exception:
@@ -173,6 +176,7 @@ if __name__ == '__main__':
             search_url = f'https://www.linkedin.com/search/results/people/?currentCompany=["{args.company_id}"]&origin=COMPANY_PAGE_CANNED_SEARCH&page={page}'
             if page != 1:
                 driver.get(search_url)
+                # print(search_url)
                 time.sleep(3)
             try:
                 entries = find_names()
